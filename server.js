@@ -1,37 +1,30 @@
-const { readdirSync } = require("fs");
-const path = require("path");
-const express = require("express");
+const express = require('express');
+const Product = require('./models/product');
+const generateToken = require('./utils/token');
+const authenticate = require('./middleware/auth');
+const mongoose = require('mongoose');
 const app = express();
-const helmet = require("mongoose");
-require("dotenv").config();
-const morgan = require("morgan");
-const cors = require("cors");
-const { default: mongoose } = require("mongoose");
-const { error } = require("console");
 
+app.get('/products', authenticate, async (req, res) => {
+    try {
+      const products = await Product.find({}, 'name price');
+      res.json(products);
+    } catch (err) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
+  app.post('/products', authenticate, (req, res) => {
 
-// middleware
+  });
 
-app.use(cors());
-app.use(morgan("dev"));
-app.use(express.json());
-app.use(express.urlencoded({extended : false}));
-app.use(helmet());
-
-//routes middlewire
-
-readdirSync("./routes").map(r => app.use("api/v1/",require(`./routes/${r}`)));
-
-//server
-const port = process.env.PORT || 8000;
-
-// MongoDB Connection 
-
-mongoose
-    .connect(process.env.DATABASE)
-    .then(()=> {
-        app.listen(port, () => {
-            console.log(`Server Running on port ${port}`)
-        });
-    })
-    .catch((error) => console.log(err));
+mongoose.connect('mongodb://localhost:27017/assign10', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true
+}).then(() => {
+  console.log('Connected to the database');
+}).catch((error) => {
+  console.error('Error connecting to the database:', error);
+});
+const secretKey = 'ibks12355'; 
